@@ -25,10 +25,10 @@ def prep_telco(isp):
 
 def chop_data(frame, col):
 
-    train, validate_test = train_test_split(df,
+    train, validate_test = train_test_split(frame,
                      train_size=0.6,
                      random_state=123,
-                     stratify=df[col]
+                     stratify=frame[col]
                     )
 
     validate, test = train_test_split(validate_test,
@@ -38,3 +38,18 @@ def chop_data(frame, col):
                         
                                      )
     return train, validate, test
+
+def preprocess_titanic(train, test, validate):
+    appendo = []
+  
+    for stuff in [train, test, validate]:
+        stuff['gender'] = stuff['sex'].map({'male': 0, 'female': 1})
+        stuff.drop(columns='sex', inplace=True)
+        stuff.drop(columns='passenger_id', inplace=True)
+        stuff["pclass"] = stuff["pclass"].astype(int)
+        stuff['embark_town'].fillna('missing', inplace=True)
+        new_embark_town = pd.get_dummies(stuff['embark_town'], drop_first=True).astype(int)
+        appendo.append(pd.concat([stuff,new_embark_town],axis=1).drop(columns='embark_town'))
+        
+
+    return appendo
